@@ -2,14 +2,6 @@
 
 A practice version of the LSAT online administration system that supports custom test content via JSON format.
 
-## Features
-
-- **Reading Comprehension (RC)**: Support for up to 4 passages with 5-8 questions each
-- **Logical Reasoning (LR)**: Individual questions with stimulus and 5 answer choices
-- **Analytical Reasoning (LG)**: Logic games with setup and questions
-- **Custom JSON Input**: Load your own test content via JSON files or text input
-- **Full Test Simulation**: 4 sections with timing, breaks, and scoring
-
 ## JSON Format
 
 The application accepts JSON files with the following structure:
@@ -85,71 +77,8 @@ The application accepts JSON files with the following structure:
   - `choices`: Array of exactly 5 answer choices
   - `correct`: Index of correct answer (0-4)
 
-### Logic Games (LG)
-
-```json
-{
-  "LG": {
-    "timeLimit": 35,
-    "game": {
-      "title": "Game Title",
-      "setup": "Game setup and rules...",
-      "questions": [
-        {
-          "text": "Question text?",
-          "choices": [
-            "Choice A",
-            "Choice B",
-            "Choice C",
-            "Choice D", 
-            "Choice E"
-          ],
-          "correct": 0
-        }
-      ]
-    }
-  }
-}
-```
-
-**LG Structure:**
-- `timeLimit`: Section time limit in minutes (default: 35)
-- `game`: Single logic game
-  - `title`: Game title
-  - `setup`: Game setup and rules text
-  - `questions`: Array of questions
-    - `text`: Question text
-    - `choices`: Array of exactly 5 answer choices
-    - `correct`: Index of correct answer (0-4)
-
 ## Usage
 
 1. **Load Default Test**: Simply click "Begin Test" to use the built-in sample questions
 2. **Load Custom JSON**: 
    - Upload a JSON file using the file picker
-   - Or paste JSON content directly into the textarea
-   - Click "Load JSON Data" to apply
-3. **Reset to Default**: Click "Reset to Default" to return to sample content
-
-## File Structure
-
-- `index.html` - Main application interface
-- `script.js` - Core application logic
-- `style.css` - Styling and layout
-- `in.json` - Sample JSON data file
-- `README.md` - This documentation
-
-## Browser Compatibility
-
-Works in modern browsers that support:
-- ES6+ JavaScript features
-- File API
-- Fetch API
-- CSS Grid and Flexbox
-
-## Notes
-
-- All sections default to 35 minutes if not specified
-- Answer choices must be exactly 5 options (A-E)
-- Correct answer indices are 0-based (0 = A, 1 = B, etc.)
-- The application will validate JSON format and show error messages for invalid input
