@@ -2,7 +2,6 @@
 
 A practice version of the LSAT online administration system that supports custom test content via JSON format.
 
-<<<<<<< HEAD
 ## Features
 
 - **Reading Comprehension (RC)**: Support for up to 4 passages with 5-8 questions each
@@ -11,10 +10,7 @@ A practice version of the LSAT online administration system that supports custom
 - **Full Test Simulation**: 4 sections with timing, breaks, and scoring
 
 =======
->>>>>>> 5a3df5e0879ba7a14e905f767243e957c374a3ab
 ## JSON Format
-
-The application accepts JSON files with the following structure. A complete test must include all three sections: RC, LR1, and LR2.
 
 ### Complete Test Structure
 
@@ -64,16 +60,6 @@ The application accepts JSON files with the following structure. A complete test
 }
 ```
 
-**RC Structure:**
-- `timeLimit`: Section time limit in minutes (default: 35)
-- `passages`: Array of up to 4 passages
-  - `title`: Passage title
-  - `content`: Full passage text
-  - `questions`: Array of 5-8 questions per passage
-    - `text`: Question text
-    - `choices`: Array of exactly 5 answer choices
-    - `correct`: Index of correct answer (0-4)
-
 ### Logical Reasoning (LR1 & LR2)
 
 ```json
@@ -97,26 +83,3 @@ The application accepts JSON files with the following structure. A complete test
   }
 }
 ```
-
-**LR Structure:**
-- `timeLimit`: Section time limit in minutes (default: 35)
-- `questions`: Array of individual questions
-  - `stimulus`: Argument or stimulus text
-  - `text`: Question text
-  - `choices`: Array of exactly 5 answer choices
-  - `correct`: Index of correct answer (0-4)
-
-<<<<<<< HEAD
-**Note:** Both LR1 and LR2 sections follow the same structure. The application expects exactly two Logical Reasoning sections.
-
-=======
->>>>>>> 5a3df5e0879ba7a14e905f767243e957c374a3ab
-## Usage
-
-1. **Load Default Test**: Simply click "Begin Test" to use the built-in sample questions
-2. **Load Custom JSON**: 
-   - Upload a JSON file using the file picker
-<<<<<<< HEAD
-   - Click "Load JSON Data" to apply
-=======
->>>>>>> 5a3df5e0879ba7a14e905f767243e957c374a3ab
