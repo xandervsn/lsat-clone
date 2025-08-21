@@ -2,6 +2,7 @@
 
 A practice version of the LSAT online administration system that supports custom test content via JSON format.
 
+<<<<<<< HEAD
 ## Features
 
 - **Reading Comprehension (RC)**: Support for up to 4 passages with 5-8 questions each
@@ -9,6 +10,8 @@ A practice version of the LSAT online administration system that supports custom
 - **Custom JSON Input**: Load your own test content via JSON files or text input
 - **Full Test Simulation**: 4 sections with timing, breaks, and scoring
 
+=======
+>>>>>>> 5a3df5e0879ba7a14e905f767243e957c374a3ab
 ## JSON Format
 
 The application accepts JSON files with the following structure. A complete test must include all three sections: RC, LR1, and LR2.
@@ -103,11 +106,17 @@ The application accepts JSON files with the following structure. A complete test
   - `choices`: Array of exactly 5 answer choices
   - `correct`: Index of correct answer (0-4)
 
+<<<<<<< HEAD
 **Note:** Both LR1 and LR2 sections follow the same structure. The application expects exactly two Logical Reasoning sections.
 
+=======
+>>>>>>> 5a3df5e0879ba7a14e905f767243e957c374a3ab
 ## Usage
 
 1. **Load Default Test**: Simply click "Begin Test" to use the built-in sample questions
 2. **Load Custom JSON**: 
    - Upload a JSON file using the file picker
+<<<<<<< HEAD
    - Click "Load JSON Data" to apply
+=======
+>>>>>>> 5a3df5e0879ba7a14e905f767243e957c374a3ab
