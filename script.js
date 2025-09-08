@@ -194,6 +194,11 @@ class LSATTestEnvironment {
         document.getElementById('json-file-input').addEventListener('change', (e) => {
             this.handleJsonUpload(e);
         });
+
+        // Copy summary button
+        document.getElementById('copy-summary-btn').addEventListener('click', () => {
+            this.copySummaryToClipboard();
+        });
     }
 
     // Show a specific screen
@@ -672,20 +677,30 @@ class LSATTestEnvironment {
         
         let totalCorrect = 0;
         let totalQuestions = 0;
+        let copyPasteSummary = '';
+        
+        // Add overall header to copy-paste summary
+        copyPasteSummary += 'LSAT Practice Test Results Summary\n';
+        copyPasteSummary += '=====================================\n\n';
         
         for (let i = 1; i <= 3; i++) {
             const sectionType = this.sectionOrder[i - 1];
             const sectionData = this.sectionData[sectionType];
-            const maxQuestions = sectionType === 'RC' ? sectionData.passages[0].questions.length : sectionData.questions.length;
+            const maxQuestions = sectionType === 'RC' ? this.getRCTotalQuestions(sectionData) : sectionData.questions.length;
             
             let answeredCount = 0;
             let correctCount = 0;
+            let wrongAnswers = [];
             
             // Create section header
             const sectionHeader = document.createElement('li');
             sectionHeader.className = 'section-header';
             sectionHeader.innerHTML = `<h4>Section ${i}: ${sectionData.type}</h4>`;
             summaryList.appendChild(sectionHeader);
+            
+            // Add to copy-paste summary
+            copyPasteSummary += `Section ${i}: ${sectionData.type}\n`;
+            copyPasteSummary += `${'='.repeat(30)}\n`;
             
             // Add question-by-question results
             for (let j = 1; j <= maxQuestions; j++) {
@@ -701,6 +716,18 @@ class LSATTestEnvironment {
                     if (isCorrect) {
                         correctCount++;
                         totalCorrect++;
+                    } else {
+                        // Add wrong answer details to copy-paste summary
+                        const questionData = this.getQuestionData(sectionType, sectionData, j);
+                        if (questionData) {
+                            wrongAnswers.push({
+                                questionNumber: j,
+                                questionText: questionData.text,
+                                userAnswer: userAnswer,
+                                correctAnswer: correctAnswer,
+                                choices: questionData.choices
+                            });
+                        }
                     }
                     
                     const questionItem = document.createElement('li');
@@ -722,6 +749,27 @@ class LSATTestEnvironment {
                 }
             }
             
+            // Add wrong answers details to copy-paste summary
+            if (wrongAnswers.length > 0) {
+                copyPasteSummary += `\nWrong Answers (${wrongAnswers.length}):\n`;
+                copyPasteSummary += `${'-'.repeat(20)}\n`;
+                
+                wrongAnswers.forEach(wrong => {
+                    copyPasteSummary += `\nQuestion ${wrong.questionNumber}:\n`;
+                    copyPasteSummary += `Question: ${wrong.questionText}\n`;
+                    copyPasteSummary += `Your Answer: ${String.fromCharCode(65 + wrong.userAnswer)} - ${wrong.choices[wrong.userAnswer]}\n`;
+                    copyPasteSummary += `Correct Answer: ${String.fromCharCode(65 + wrong.correctAnswer)} - ${wrong.choices[wrong.correctAnswer]}\n`;
+                    copyPasteSummary += `\nAll Answer Choices:\n`;
+                    wrong.choices.forEach((choice, index) => {
+                        const letter = String.fromCharCode(65 + index);
+                        copyPasteSummary += `${letter}. ${choice}\n`;
+                    });
+                    copyPasteSummary += `\n`;
+                });
+            } else {
+                copyPasteSummary += `\nNo wrong answers in this section!\n`;
+            }
+            
             // Add section summary
             const sectionSummary = document.createElement('li');
             sectionSummary.className = 'section-summary';
@@ -729,6 +777,10 @@ class LSATTestEnvironment {
                 <strong>Section ${i} Summary: ${correctCount}/${answeredCount} correct (${answeredCount > 0 ? Math.round((correctCount/answeredCount)*100) : 0}%)</strong>
             `;
             summaryList.appendChild(sectionSummary);
+            
+            // Add to copy-paste summary
+            copyPasteSummary += `\nSection ${i} Summary: ${correctCount}/${answeredCount} correct (${answeredCount > 0 ? Math.round((correctCount/answeredCount)*100) : 0}%)\n`;
+            copyPasteSummary += `\n`;
             
             // Add spacing
             const spacer = document.createElement('li');
@@ -743,6 +795,77 @@ class LSATTestEnvironment {
             <h3>Overall Results: ${totalCorrect}/${totalQuestions} correct (${totalQuestions > 0 ? Math.round((totalCorrect/totalQuestions)*100) : 0}%)</h3>
         `;
         summaryList.insertBefore(overallSummary, summaryList.firstChild);
+        
+        // Add overall summary to copy-paste summary
+        copyPasteSummary += `\nOverall Results: ${totalCorrect}/${totalQuestions} correct (${totalQuestions > 0 ? Math.round((totalCorrect/totalQuestions)*100) : 0}%)\n`;
+        
+        // Store the copy-paste summary
+        this.copyPasteSummary = copyPasteSummary;
+        
+        // Display the summary text
+        const summaryTextElement = document.getElementById('summary-text');
+        summaryTextElement.textContent = copyPasteSummary;
+        summaryTextElement.classList.add('show');
+    }
+
+    // Get question data for a specific question number
+    getQuestionData(sectionType, sectionData, questionNumber) {
+        if (sectionType === 'RC') {
+            const passageData = this.getRCPassageAndQuestion(sectionData, questionNumber);
+            if (passageData) {
+                return passageData.question;
+            }
+        } else if (sectionType === 'LR1' || sectionType === 'LR2') {
+            return sectionData.questions[questionNumber - 1];
+        }
+        return null;
+    }
+
+    // Copy summary to clipboard
+    async copySummaryToClipboard() {
+        try {
+            if (this.copyPasteSummary) {
+                await navigator.clipboard.writeText(this.copyPasteSummary);
+                this.showNotification('Summary copied to clipboard!', 'success');
+            } else {
+                this.showNotification('No summary available to copy.', 'error');
+            }
+        } catch (err) {
+            // Fallback for older browsers
+            const summaryTextElement = document.getElementById('summary-text');
+            const textArea = document.createElement('textarea');
+            textArea.value = this.copyPasteSummary;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                this.showNotification('Summary copied to clipboard!', 'success');
+            } catch (fallbackErr) {
+                this.showNotification('Failed to copy summary. Please select and copy manually.', 'error');
+            }
+            document.body.removeChild(textArea);
+        }
+    }
+
+    // Show notification
+    showNotification(message, type = 'info') {
+        // Remove any existing notifications
+        const existingNotification = document.querySelector('.notification');
+        if (existingNotification) {
+            existingNotification.remove();
+        }
+
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+
+        // Auto-remove after 3 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 3000);
     }
 
     // Toggle highlighter

@@ -632,6 +632,7 @@ body {
 
 .question-number.flagged {
     /* No color change for flagged questions - only flag icon */
+    position: relative;
 }
 
 .question-number.flagged::after {
@@ -1054,4 +1055,51 @@ button:focus, .answer-choice:focus, .question-number:focus {
 
 #json-menu-link:hover {
     color: #1a2a3a;
+}
+
+/* Copy Summary Section */
+.copy-summary-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+    text-align: left;
+    border: 2px solid #2C3D4F;
+}
+
+.copy-summary-section h3 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.copy-summary-section p {
+    color: #666;
+    margin-bottom: 15px;
+    text-align: center;
+    font-size: 0.9em;
+}
+
+.summary-text-display {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 15px;
+    margin-top: 15px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85em;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    max-height: 300px;
+    overflow-y: auto;
+    display: none;
+}
+
+.summary-text-display.show {
+    display: block;
+}
+
+#copy-summary-btn {
+    width: 100%;
+    margin-bottom: 10px;
 }
