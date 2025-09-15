@@ -14,6 +14,8 @@ class LSATTestEnvironment {
         this.notes = {};
         this.currentRCPassageIndex = null;
         this.currentRCSectionData = null;
+        this.isSingleSectionMode = false;
+        this.selectedSectionType = null;
         
         this.initializeEventListeners();
         this.initializeTestData();
@@ -199,6 +201,45 @@ class LSATTestEnvironment {
         document.getElementById('copy-summary-btn').addEventListener('click', () => {
             this.copySummaryToClipboard();
         });
+
+        // Test mode selection
+        document.querySelectorAll('input[name="test-mode"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                this.handleTestModeChange(e.target.value);
+            });
+        });
+
+        // Section type selection
+        document.querySelectorAll('input[name="section-type"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                this.selectedSectionType = e.target.value;
+            });
+        });
+    }
+
+    // Handle test mode change
+    handleTestModeChange(mode) {
+        const sectionSelection = document.getElementById('section-selection');
+        if (mode === 'single') {
+            sectionSelection.style.display = 'block';
+            this.isSingleSectionMode = true;
+            // Set default selection to LR1 if none selected
+            if (!this.selectedSectionType) {
+                const lr1Radio = document.querySelector('input[name="section-type"][value="LR1"]');
+                if (lr1Radio) {
+                    lr1Radio.checked = true;
+                    this.selectedSectionType = 'LR1';
+                }
+            }
+        } else {
+            sectionSelection.style.display = 'none';
+            this.isSingleSectionMode = false;
+            this.selectedSectionType = null;
+            // Clear any selected section type radio buttons
+            document.querySelectorAll('input[name="section-type"]').forEach(radio => {
+                radio.checked = false;
+            });
+        }
     }
 
     // Show a specific screen
@@ -219,6 +260,12 @@ class LSATTestEnvironment {
 
     // Start the test
     startTest() {
+        // Validate single section mode selection
+        if (this.isSingleSectionMode && !this.selectedSectionType) {
+            this.showNotification('Please select a section type for single section mode.', 'error');
+            return;
+        }
+
         // Reset test state
         this.currentSection = 1;
         this.currentQuestion = 1;
@@ -228,6 +275,13 @@ class LSATTestEnvironment {
         this.notes = {};
         this.currentRCPassageIndex = null;
         this.currentRCSectionData = null;
+        
+        // Set section order based on mode
+        if (this.isSingleSectionMode) {
+            this.sectionOrder = [this.selectedSectionType];
+        } else {
+            this.sectionOrder = this.generateSectionOrder();
+        }
         
         // Clear any existing timers
         Object.values(this.sectionTimers).forEach(timer => {
@@ -655,8 +709,8 @@ class LSATTestEnvironment {
         
         this.hideSubmitModal();
         
-        // Check if this was the last section
-        if (this.currentSection === 3) {
+        // Check if this was the last section or if in single section mode
+        if (this.isSingleSectionMode || this.currentSection === 3) {
             this.endTest();
         } else {
             this.loadSection(this.currentSection + 1);
@@ -668,6 +722,18 @@ class LSATTestEnvironment {
     endTest() {
         this.showScreen('end-screen');
         this.generateTestSummary();
+        
+        // Update end screen text for single section mode
+        if (this.isSingleSectionMode) {
+            const endContainer = document.querySelector('.end-container h2');
+            const endText = document.querySelector('.end-container p');
+            if (endContainer) {
+                endContainer.textContent = 'Section Complete';
+            }
+            if (endText) {
+                endText.textContent = `You have completed the ${this.sectionData[this.selectedSectionType].type} section.`;
+            }
+        }
     }
 
     // Generate test summary
@@ -680,10 +746,16 @@ class LSATTestEnvironment {
         let copyPasteSummary = '';
         
         // Add overall header to copy-paste summary
-        copyPasteSummary += 'LSAT Practice Test Results Summary\n';
-        copyPasteSummary += '=====================================\n\n';
+        if (this.isSingleSectionMode) {
+            copyPasteSummary += 'LSAT Single Section Practice Results Summary\n';
+            copyPasteSummary += '==========================================\n\n';
+        } else {
+            copyPasteSummary += 'LSAT Practice Test Results Summary\n';
+            copyPasteSummary += '=====================================\n\n';
+        }
         
-        for (let i = 1; i <= 3; i++) {
+        const maxSections = this.isSingleSectionMode ? 1 : 3;
+        for (let i = 1; i <= maxSections; i++) {
             const sectionType = this.sectionOrder[i - 1];
             const sectionData = this.sectionData[sectionType];
             const maxQuestions = sectionType === 'RC' ? this.getRCTotalQuestions(sectionData) : sectionData.questions.length;
