@@ -8,6 +8,7 @@ class LSATTestEnvironment {
         this.answers = {};
         this.correctAnswers = {};
         this.flaggedQuestions = new Set();
+        this.crossedOffAnswers = {}; // Store crossed-off state per question
         this.sectionTimers = {};
         this.breakTimer = null;
         this.isHighlighterActive = false;
@@ -160,7 +161,8 @@ class LSATTestEnvironment {
                 clearInterval(this.breakTimer);
                 this.breakTimer = null;
             }
-            this.resumeTest();
+            this.loadSection(this.currentSection + 1);
+            this.startSectionTimer();
         });
 
         // Keyboard shortcuts
@@ -272,6 +274,7 @@ class LSATTestEnvironment {
         this.answers = {};
         this.correctAnswers = {};
         this.flaggedQuestions = new Set();
+        this.crossedOffAnswers = {};
         this.notes = {};
         this.currentRCPassageIndex = null;
         this.currentRCSectionData = null;
@@ -440,6 +443,16 @@ class LSATTestEnvironment {
         if (this.answers[answerKey] !== undefined) {
             this.selectAnswer(this.answers[answerKey]);
         }
+        
+        // Restore crossed-off answers if they exist
+        if (this.crossedOffAnswers[answerKey]) {
+            const answerChoices = document.querySelectorAll('.answer-choice');
+            this.crossedOffAnswers[answerKey].forEach(choiceIndex => {
+                if (answerChoices[choiceIndex]) {
+                    answerChoices[choiceIndex].classList.add('struck-through');
+                }
+            });
+        }
     }
 
     // Select an answer
@@ -459,6 +472,20 @@ class LSATTestEnvironment {
     // Toggle strikethrough for answer choice text
     toggleStrikeThrough(choiceElement) {
         choiceElement.classList.toggle('struck-through');
+        
+        // Save the crossed-off state
+        const answerKey = `${this.currentSection}-${this.currentQuestion}`;
+        const choiceIndex = Array.from(choiceElement.parentNode.children).indexOf(choiceElement);
+        
+        if (!this.crossedOffAnswers[answerKey]) {
+            this.crossedOffAnswers[answerKey] = new Set();
+        }
+        
+        if (choiceElement.classList.contains('struck-through')) {
+            this.crossedOffAnswers[answerKey].add(choiceIndex);
+        } else {
+            this.crossedOffAnswers[answerKey].delete(choiceIndex);
+        }
     }
 
     // Navigate to previous question
