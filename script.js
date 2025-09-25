@@ -1,14 +1,14 @@
-// LSAT Online Test Environment - Main Application
+// LSAT test app
 class LSATTestEnvironment {
     constructor() {
         this.currentSection = 1;
         this.currentQuestion = 1;
         this.sectionOrder = this.generateSectionOrder();
-        this.sectionData = null; // Will be initialized after JSON loading
+        this.sectionData = null; // gets loaded from JSON
         this.answers = {};
         this.correctAnswers = {};
         this.flaggedQuestions = new Set();
-        this.crossedOffAnswers = {}; // Store crossed-off state per question
+        this.crossedOffAnswers = {}; // track which answers are crossed out
         this.sectionTimers = {};
         this.breakTimer = null;
         this.isHighlighterActive = false;
@@ -22,25 +22,25 @@ class LSATTestEnvironment {
         this.initializeTestData();
     }
 
-    // Initialize test data asynchronously
+    // load test data
     async initializeTestData() {
         this.sectionData = await this.createTestData();
         this.showScreen('start-screen');
     }
 
-    // Generate randomized section order
+    // shuffle sections randomly
     generateSectionOrder() {
         const sections = ['RC', 'LR1', 'LR2'];
         const shuffled = [...sections].sort(() => Math.random() - 0.5);
         return shuffled;
     }
 
-    // Get total number of questions for RC section (across all passages)
+    // count all RC questions
     getRCTotalQuestions(sectionData) {
         return sectionData.passages.reduce((total, passage) => total + passage.questions.length, 0);
     }
 
-    // Get passage and question index for a given question number in RC
+    // find which passage and question this is
     getRCPassageAndQuestion(sectionData, questionNumber) {
         let currentQuestion = 0;
         for (let passageIndex = 0; passageIndex < sectionData.passages.length; passageIndex++) {
@@ -60,12 +60,12 @@ class LSATTestEnvironment {
         return null;
     }
 
-    // Convert newlines to HTML line breaks
+    // fix line breaks for display
     convertNewlinesToBreaks(text) {
         return text.replace(/\n/g, '<br>');
     }
 
-    // Load a specific RC passage
+    // show RC passage
     loadRCPassage(passageIndex) {
         if (!this.currentRCSectionData) return;
         
@@ -78,7 +78,7 @@ class LSATTestEnvironment {
         `;
     }
 
-    // Create test data from JSON file
+    // load test data from JSON
     async createTestData() {
         try {
             const response = await fetch('./in.json');
@@ -87,10 +87,10 @@ class LSATTestEnvironment {
                 return jsonData;
             }
         } catch (error) {
-            console.warn('Could not load in.json file:', error);
+            console.warn('no JSON file found:', error);
         }
         
-        // Fallback to default data if JSON loading fails
+        // default empty data if no JSON
         return {
             RC: {
                 type: 'Reading Comprehension',
@@ -110,7 +110,7 @@ class LSATTestEnvironment {
         };
     }
 
-    // Initialize all event listeners
+    // set up all the click handlers
     initializeEventListeners() {
         // Start screen
         document.getElementById('begin-test-btn').addEventListener('click', () => {
@@ -1025,81 +1025,9 @@ class LSATTestEnvironment {
     hideNotesModal() {
         document.getElementById('notes-modal').classList.remove('active');
     }
-
-    // Handle keyboard shortcuts
-    handleKeyboardShortcuts(e) {
-        // Only handle shortcuts in test environment
-        if (!document.getElementById('test-environment').classList.contains('active')) {
-            return;
-        }
-        
-        switch(e.key) {
-            case 'ArrowLeft':
-                e.preventDefault();
-                this.previousQuestion();
-                break;
-            case 'ArrowRight':
-                e.preventDefault();
-                this.nextQuestion();
-                break;
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-                e.preventDefault();
-                this.selectAnswer(parseInt(e.key) - 1);
-                break;
-            case 'a':
-            case 'A':
-                e.preventDefault();
-                this.selectAnswer(0);
-                break;
-            case 'b':
-            case 'B':
-                e.preventDefault();
-                this.selectAnswer(1);
-                break;
-            case 'c':
-            case 'C':
-                e.preventDefault();
-                this.selectAnswer(2);
-                break;
-            case 'd':
-            case 'D':
-                e.preventDefault();
-                this.selectAnswer(3);
-                break;
-            case 'e':
-            case 'E':
-                e.preventDefault();
-                this.selectAnswer(4);
-                break;
-            case 'f':
-            case 'F':
-                e.preventDefault();
-                this.toggleFlag();
-                break;
-            case 'h':
-            case 'H':
-                e.preventDefault();
-                this.toggleHighlighter();
-                break;
-            case 'n':
-            case 'N':
-                e.preventDefault();
-                this.showNotesModal();
-                break;
-            case 'Escape':
-                e.preventDefault();
-                this.hideNotesModal();
-                this.hideSubmitModal();
-                break;
-        }
-    }
 }
 
-// Initialize the application when the page loads
+// init
 document.addEventListener('DOMContentLoaded', () => {
     new LSATTestEnvironment();
 });
