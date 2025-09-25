@@ -771,8 +771,9 @@ body {
 
 .question-number.current {
     background: #2C3D4F;
-    color: white;
+    color: #ffeb3b;
     border-color: #2C3D4F;
+    font-weight: bold;
 }
 
 /* Tools Panel */
