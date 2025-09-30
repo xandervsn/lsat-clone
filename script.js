@@ -718,8 +718,6 @@ class LSATTestEnvironment {
                 this.hideJsonModal();
                 this.showNotification('JSON file uploaded successfully!', 'success');
                 
-                // Restart the test with new data
-                this.startTest();
             } catch (error) {
                 this.showNotification('Invalid JSON file. Please check the format.', 'error');
             }
